@@ -1,6 +1,6 @@
 <launch>
 	<!-- Arguments -->
-	<arg name="gazebo" default="false"/>
+	<arg name="gazebo" default="True"/>
 	<arg name="map_file" default="$(find Four-wheel_omuni)/map/map_world_CG.yaml"/>
 	<arg name="open_rviz" default="true"/>
 
