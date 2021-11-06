@@ -1,0 +1,48 @@
+DWAPlannerROS:
+
+# Robot Configuration Parameters
+  max_vel_x: 0.15           #0.22[m/s] ロボットの最大x速度（m / s）
+  min_vel_x: -0.15          #-0.22[m/s] ロボットの最小x速度（m / s）後方への動きの場合は負
+
+  max_vel_y: 0.0            #ロボットの最大y速度（m / s）
+  min_vel_y: 0.0            #ロボットの最小y速度（m / s）
+
+# The velocity when robot is moving in a straight line
+  max_vel_trans:  0.22      #ロボットの最大並進速度の絶対値（m / s）
+  min_vel_trans:  0.11      #ロボットの最小並進速度の絶対値（m / s）
+
+  max_vel_theta: 2.75
+  min_vel_theta: 0.10 #1.37
+
+#ロボットの加速限界
+  acc_lim_x: 2.5
+  acc_lim_y: 0.0
+  acc_lim_theta: 2.5 #3.2
+
+# Goal Tolerance Parametes
+  xy_goal_tolerance: 0.05
+  yaw_goal_tolerance: 0.07 #0.17
+  latch_xy_goal_tolerance: false
+
+# Forward Simulation Parameters
+  sim_time: 1.5              #軌道を順方向にシミュレートする時間（秒単位）
+  vx_samples: 20             #x速度空間を探索するときに使用するサンプルの数
+  vy_samples: 0              #y速度空間を探索するときに使用するサンプルの数
+  vth_samples: 40            #シータ速度空間を探索するときに使用するサンプルの数
+  controller_frequency: 10.0 #このコントローラーが呼び出される周波数（Hz）
+
+# Trajectory Scoring Parameters
+  path_distance_bias: 32.0      #コントローラが指定されたパスの近くにとどまる必要がある量の重み付け
+  goal_distance_bias: 20.0      #コントローラがローカル目標に到達しようとする量の重み付けも、速度を制御します
+  occdist_scale: 0.02           #コントローラが障害物を回避しようとする量の重み付け
+  forward_point_distance: 0.325 #追加のスコアリングポイントを配置するためのロボットの中心点からの距離（メートル単位）
+  stop_time_buffer: 0.2         #軌道が有効であると見なされるために、衝突前にロボットが停止しなければならない時間（秒単位）
+  scaling_speed: 0.25           #ロボットのフットプリントのスケーリングを開始する速度の絶対値（m / s）
+  max_scaling_factor: 0.2       #ロボットのフットプリントをスケーリングする最大係数
+
+# Oscillation Prevention Parameters
+  oscillation_reset_dist: 0.05  #振動フラグがリセットされる前に、ロボットがメートル単位で移動する必要がある距離
+
+# Debugging
+  publish_traj_pc : true
+  publish_cost_grid_pc: true

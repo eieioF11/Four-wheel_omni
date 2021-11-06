@@ -1,0 +1,129 @@
+<?xml version="1.0"?>
+<robot name="OmuniRobot" xmlns:xacro="http://ros.org/wiki/xacro">
+	<xacro:include filename="$(find Four-wheel_omni)/xacro/lidar.xacro" />
+	<xacro:include filename="$(find Four-wheel_omni)/xacro/imu.xacro" />
+
+	<material name="gray">
+		<color rgba="0.7 0.7 0.7 2.5"/>
+	</material>
+	<material name="red">
+		<color rgba="1.0 0.0 0.0 2.5"/>
+	</material>
+	<material name="blue">
+		<color rgba="0.0 0.0 1.0 2.5"/>
+	</material>
+
+	<xacro:macro name="wheel_macro" params="parent prefix xyz deg　*joint_axis">
+		<joint name="${prefix}_joint" type="continuous">
+			<origin xyz="${xyz}" rpy="0 0 ${radians(deg)}"/>
+			<parent link="${parent}"/>
+			<child  link="${prefix}_link"/>
+			<insert_block name="joint_axis"/>
+		</joint>
+		<transmission name="${prefix}_trans">
+			<type>transmission_interface/SimpleTransmission</type>
+			<joint name="${prefix}_joint">
+				<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+			</joint>
+			<actuator name="${prefix}_motor">
+				<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+				<mechanismReduction>1</mechanismReduction>
+			</actuator>
+		</transmission>
+		<link name="${prefix}_link">
+			<inertial>
+				<origin xyz="0 0 0" rpy="0 0 0"/>
+				<mass value="0.02"/>
+				<inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
+			</inertial>
+			<visual>
+				<origin xyz="0 0 0" rpy="${radians(90)} 0 0"/>
+				<geometry>
+					<cylinder radius="0.03" length="0.01" />
+				</geometry>
+				<material name="red"/>
+			</visual>
+			<collision>
+				<origin xyz="0 0 0" rpy="${radians(90)} 0 0"/>
+				<geometry>
+					<cylinder radius="0.03" length="0.01" />
+				</geometry>
+			</collision>
+		</link>
+		<gazebo reference="${prefix}_link">
+			<material>Gazebo/Red</material>
+			<mu1 value="0.0" />
+			<mu2 value="1.0" />
+			<kp value="5000" />
+			<kd value="10" />
+			<fdir1>0 0 1</fdir1>
+		</gazebo>
+	</xacro:macro>
+
+	<link name="base_link"/>
+
+	<joint name="body_joint" type="fixed">
+		<parent link="base_link"/>
+		<child  link="body_link"/>
+		<origin xyz="0 0 0.0033" rpy="0 0 0"/>
+	</joint>
+	<link name="body_link">
+		<inertial>
+			<origin xyz="0 0 0.03" rpy="0 0 0" />
+			<mass value="1.0"/>
+			<inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+		</inertial>
+		<visual>
+			<origin xyz="0 0 0.03" rpy="0 0 0" />
+			<geometry>
+				<box size="0.20 0.20 0.05" />
+			</geometry>
+			<material name="gray" />
+		</visual>
+		<collision>
+			<origin xyz="0 0 0.03" rpy="0 0 0" />
+			<geometry>
+				<box size="0.20 0.20 0.05" />
+			</geometry>
+		</collision>
+	</link>
+	<gazebo reference="body_link">
+		<material>Gazebo/Gray</material>
+		<mu1>0.05</mu1>
+		<mu2>0.05</mu2>
+	</gazebo>
+
+	<xacro:wheel_macro prefix="wheel0"  parent="base_link" xyz="-0.1 0.1 0.03" deg="45">
+		<axis xyz="0 1 0"/>
+	</xacro:wheel_macro>
+	<xacro:wheel_macro prefix="wheel1" parent="base_link" xyz="-0.1 -0.1 0.03" deg="135">
+		<axis xyz="0 1 0"/>
+	</xacro:wheel_macro>
+	<xacro:wheel_macro prefix="wheel2" parent="base_link" xyz="0.1 -0.1 0.03" deg="225">
+		<axis xyz="0 1 0"/>
+	</xacro:wheel_macro>
+	<xacro:wheel_macro prefix="wheel3" parent="base_link" xyz="0.1 0.1 0.03" deg="-45">
+		<axis xyz="0 1 0"/>
+	</xacro:wheel_macro>
+
+
+	<xacro:laser_macro prefix="laser" parent="base_link" xyz="0 0 0.078"/>
+	<xacro:imu_macro prefix="imu" parent="base_link" xyz="0.08 0 0.06"/>
+
+	<gazebo>
+		<plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+		<robotNamespace>/OmuniRobot</robotNamespace>
+		<!--
+		<robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>-->
+		<legacyModeNS>true</legacyModeNS>
+		</plugin>
+	</gazebo>
+	<gazebo>
+		<plugin name="ground_truth" filename="libgazebo_ros_p3d.so">
+		<frameName>world</frameName>
+		<bodyName>base_link</bodyName>
+		<topicName>/tracker</topicName>
+		<updateRate>10.0</updateRate>
+		</plugin>
+	</gazebo>
+</robot>
