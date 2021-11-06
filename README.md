@@ -6,7 +6,7 @@ sudo apt-get install ros-melodic-teleop-twist-keyboard
 ```
 ## Gazebo
 ```bash
-roslaunch F11Robo gazebo.launch
+roslaunch Four-wheel_omni gazebo.launch
 ```
 ## オムニ四輪コントローラー
 ```bash
