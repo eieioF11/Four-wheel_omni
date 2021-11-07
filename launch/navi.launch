@@ -1,18 +1,18 @@
 <launch>
 	<!-- Arguments -->
 	<arg name="gazebo" default="True"/>
-	<arg name="map_file" default="$(find Four-wheel_omuni)/map/map_world_CG.yaml"/>
+	<arg name="map_file" default="$(find Four-wheel_omni)/map/map_world_CG.yaml"/>
 	<arg name="open_rviz" default="true"/>
 
 	<!-- odom -->
 	<group unless="$(arg gazebo)">
-		<include file="$(find Four-wheel_omuni)/launch/odom.launch">
+		<include file="$(find Four-wheel_omni)/launch/odom.launch">
 			<arg name="map_file" value="$(arg map_file)" />
 			<arg name="open_rviz" default="$(arg open_rviz)"/>
 		</include>
 	</group>
 	<group if="$(arg gazebo)">
-		<include file="$(find Four-wheel_omuni)/launch/odom_gazebo.launch">
+		<include file="$(find Four-wheel_omni)/launch/odom_gazebo.launch">
 			<arg name="map_file" value="$(arg map_file)" />
 			<arg name="open_rviz" default="$(arg open_rviz)"/>
 		</include>
