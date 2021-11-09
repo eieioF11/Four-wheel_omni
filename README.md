@@ -1,5 +1,7 @@
 # Four-wheel_omni
-オムニ４輪シミュレーション
+オムニ４輪シミュレーション\
+※製作途中\
+![robotmodel](/image/robotmodel.png)
 ## キーボード操作
 ```bash
 sudo apt-get install ros-melodic-teleop-twist-keyboard
