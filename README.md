@@ -2,9 +2,18 @@
 オムニ４輪シミュレーション\
 ※製作途中\
 ![robotmodel](/image/robotmodel.png)
-## キーボード操作
+## 環境構築
+```bash
+sudo apt-get install ros-melodic-effort-controllers
+sudo apt-get install ros-melodic-joint-state-controller
+sudo apt-get install ros-melodic-position-controllers
+```
 ```bash
 sudo apt-get install ros-melodic-teleop-twist-keyboard
+```
+## キーボード操作
+```bash
+rosrun teleop_twist_keyboard teleop_twist_keyboard.py
 ```
 ## Gazebo
 ```bash
