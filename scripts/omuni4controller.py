@@ -33,10 +33,21 @@ class omuni4():
         self.move(0,0,0)
 
     def move(self,Vx,Vy,Angular):
-        w0=Vy/2+Angular
-        w1=-Vx/2+Angular
-        w2=-Vy/2+Angular
-        w3=Vx/2+Angular
+        w0=Vy+Angular
+        w1=-Vx+Angular
+        w2=-Vy+Angular
+        w3=Vx+Angular
+        rospy.loginfo("w(%f,%f,%f,%f)",w0,w1,w2,w3)
+        self.c0.publish(w0)
+        self.c1.publish(w1)
+        self.c2.publish(w2)
+        self.c3.publish(w3)
+
+    def move_90(self,Vx,Vy,Angular):
+        w0=(-Vx+Vy)/2.0+Angular
+        w1=( Vx+Vy)/2.0+Angular
+        w2=( Vx-Vy)/2.0+Angular
+        w3=(-Vx-Vy)/2.0+Angular
         rospy.loginfo("w(%f,%f,%f,%f)",w0,w1,w2,w3)
         self.c0.publish(w0)
         self.c1.publish(w1)
@@ -47,7 +58,7 @@ class omuni4():
         rospy.loginfo("LinerX:%f",value.linear.x)
         rospy.loginfo("LinerY:%f",value.linear.y)
         rospy.loginfo("Angular:%f",value.angular.z)
-        self.move(value.linear.x,value.linear.y,value.angular.z)
+        self.move_90(value.linear.x,value.linear.y,value.angular.z)
 
     def update(self):
         pass
