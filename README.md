@@ -19,3 +19,7 @@ xacroディレクトリに移動し以下のコマンドを実行
 ```bash
 roslaunch urdf_tutorial display.launch model:=OmuniRobot.xacro
 ```
+## navigation
+```bash
+roslaunch Four-wheel_omni navi.launch
+```
