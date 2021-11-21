@@ -17,9 +17,16 @@ from std_msgs.msg import ColorRGBA, Float32
 
 import matplotlib.pyplot as plt
 
+from enum import Enum
+
 #######################################
 # Simple Path follower (Pure Pursuit) #
 #######################################
+
+class mode(Enum):
+    ROTATION = 0 #With a rotating
+    POSFIXED = 1 #Posture fixed
+
 class Simple_path_follower():
 
     ##################
@@ -30,9 +37,12 @@ class Simple_path_follower():
         rospy.init_node('Simple_Path_Follower', anonymous=True)
         self.r = rospy.Rate(50)  # 50hz
 
-        self.target_speed_max = 1.0            #target speed [km/h]
-        self.target_speed_min = 0.01
+        self.target_speed_max = 20.0            #target speed [km/h]
+        self.target_speed_min = 10.0
         self.target_LookahedDist = 0.5      #Lookahed distance for Pure Pursuit[m]
+
+        self.GOAL_LIMIT = 0.05
+        self.MODE = mode.ROTATION
 
         #first flg (for subscribe global path topic)
         self.path_first_flg = False
@@ -54,9 +64,9 @@ class Simple_path_follower():
 
         #走行経路のパスを配信
         self.path = Path()
-        #self.odom_sub = rospy.Subscriber('/odom', Odometry, self.odom_cb)
+        self.odom_sub = rospy.Subscriber('/odom', Odometry, self.odom_cb)
         #self.odom_sub = rospy.Subscriber('/F11Robo/diff_drive_controller/odom', Odometry, self.odom_cb)
-        self.odom_sub = rospy.Subscriber('/fusion/odom', Odometry, self.odom_cb)
+        #self.odom_sub = rospy.Subscriber('/fusion/odom', Odometry, self.odom_cb)
         self.path_pub = rospy.Publisher('/path_hist', Path, queue_size=10)
 
         self.cflag=False
@@ -135,7 +145,7 @@ class Simple_path_follower():
                 print (i,dist_from_current_pos_np[i])
                 dist_sp_from_nearest=self.tld[i]
                 self.nowCV=self.curvature_val[i]
-                speed=math.fabs(self.target_LookahedDist-self.map(self.nowCV,self.minCV,self.maxCV,self.target_speed_min/3.6,self.target_speed_max/3.6))
+                speed=math.fabs(self.target_LookahedDist-self.map(self.nowCV,self.minCV,self.maxCV,self.target_speed_min,self.target_speed_max))
                 if (dist_from_current_pos_np[i]) > self.tld[i]:
                     #print ("dist:",dist_from_current_pos_np[i])
                     self.target_lookahed_x = self.path_x_np[i]
@@ -146,7 +156,7 @@ class Simple_path_follower():
                     self.curvature_val=self.curvature_val[i:len(self.curvature_val)]
                     self.cflag=True
                     break
-                if self.cflag==False and np.amax(dist_sp_from_nearest)<=0.1:#check goal
+                if self.cflag==False and np.amax(dist_sp_from_nearest)<=self.GOAL_LIMIT:#check goal
                     self.gflag=True
             target_lookahed_x=self.target_lookahed_x
             target_lookahed_y=self.target_lookahed_y
@@ -164,8 +174,8 @@ class Simple_path_follower():
                 self.cflag=False
             else:
                 self.dist=math.sqrt((self.target_lookahed_x-self.current_x)**2+(self.target_lookahed_y-self.current_y)**2)
-                speed=self.map(self.dist,0,self.target_LookahedDist,self.target_speed_min/3.6,self.oldspeed)
-                if self.dist < 0.1:
+                speed=self.map(self.dist,0,self.target_LookahedDist,self.target_speed_min,self.oldspeed)
+                if self.dist <= self.GOAL_LIMIT:
                     self.gflag=True
             target_yaw=self.target_yaw
 
@@ -192,13 +202,13 @@ class Simple_path_follower():
                     yaw_rate = yaw_rate * (-1.0)
 
             #Set Cmdvel
-            if self.first and math.fabs(yaw_diff)<(math.pi/60):
+            if self.first and math.fabs(yaw_diff)<(math.pi/4):
                 self.first=False
             elif not self.first:
-                if speed>(self.target_speed_max/3.6):
-                    speed=self.target_speed_max/3.6
-                elif speed<(self.target_speed_min/3.6):
-                    speed=self.target_speed_min/3.6
+                if speed>(self.target_speed_max):
+                    speed=self.target_speed_max
+                elif speed<(self.target_speed_min):
+                    speed=self.target_speed_min
             else:
                 speed=0
 
