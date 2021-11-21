@@ -41,8 +41,8 @@ class Simple_path_follower():
         self.target_speed_min = 10.0
         self.target_LookahedDist = 0.5      #Lookahed distance for Pure Pursuit[m]
 
-        self.GOAL_LIMIT = 0.05
-        self.MODE = mode.ROTATION
+        self.GOAL_LIMIT = 0.02
+        self.MODE = mode.POSFIXED
 
         #first flg (for subscribe global path topic)
         self.path_first_flg = False
@@ -54,8 +54,9 @@ class Simple_path_follower():
         self.cmdvel_pub = rospy.Publisher("/cmd_vel", Twist, queue_size=50)
         self.lookahed_pub = rospy.Publisher("/lookahed_marker", Marker, queue_size=50)
         self.value_pub1 = rospy.Publisher("CMD_Vx", Float32, queue_size=1)
-        self.value_pub2 = rospy.Publisher("CMD_Az", Float32, queue_size=1)
-        self.value_pub3 = rospy.Publisher("Curvature_val", Float32, queue_size=1)
+        self.value_pub2 = rospy.Publisher("CMD_Vy", Float32, queue_size=1)
+        self.value_pub3 = rospy.Publisher("CMD_Az", Float32, queue_size=1)
+        self.value_pub4 = rospy.Publisher("Curvature_val", Float32, queue_size=1)
 
         #initialize subscriber
         self.path_sub = rospy.Subscriber("/path", Path, self.cb_get_path_topic_subscriber)
@@ -65,8 +66,6 @@ class Simple_path_follower():
         #走行経路のパスを配信
         self.path = Path()
         self.odom_sub = rospy.Subscriber('/odom', Odometry, self.odom_cb)
-        #self.odom_sub = rospy.Subscriber('/F11Robo/diff_drive_controller/odom', Odometry, self.odom_cb)
-        #self.odom_sub = rospy.Subscriber('/fusion/odom', Odometry, self.odom_cb)
         self.path_pub = rospy.Publisher('/path_hist', Path, queue_size=10)
 
         self.cflag=False
@@ -127,27 +126,19 @@ class Simple_path_follower():
 
         self.lookahed_pub.publish(marker_data)
 
- 
-    ###################
-    # Update cmd_vel  #
-    ###################
-    def update_cmd_vel(self):
-        self.cb_get_odometry()
+    def mode1(self):
         speed=0
         yaw_rate = 0.0
         if self.path_first_flg == True and self.odom_first_flg == True:
 
             #Target point calculation
             dist_from_current_pos_np = np.sqrt(np.power((self.path_x_np-self.current_x),2) + np.power((self.path_y_np-self.current_y),2))
-            #print(len(dist_from_current_pos_np),len(self.tld),len(self.curvature_val))
-            #print("dist:",dist_from_current_pos_np)
             for i in range(len(self.tld)):
                 print (i,dist_from_current_pos_np[i])
                 dist_sp_from_nearest=self.tld[i]
                 self.nowCV=self.curvature_val[i]
                 speed=math.fabs(self.target_LookahedDist-self.map(self.nowCV,self.minCV,self.maxCV,self.target_speed_min,self.target_speed_max))
                 if (dist_from_current_pos_np[i]) > self.tld[i]:
-                    #print ("dist:",dist_from_current_pos_np[i])
                     self.target_lookahed_x = self.path_x_np[i]
                     self.target_lookahed_y = self.path_y_np[i]
                     self.path_x_np=self.path_x_np[i:len(self.path_x_np)]
@@ -225,14 +216,101 @@ class Simple_path_follower():
 
             #publish maker
             self.publish_lookahed_marker(target_lookahed_x,target_lookahed_y,target_yaw)
-            #print("cmd_vel_update")
         #debug
         self.value_pub1.publish(speed)
-        self.value_pub2.publish(yaw_rate)
-        self.value_pub3.publish(self.nowCV)
+        self.value_pub2.publish(0.0)
+        self.value_pub3.publish(yaw_rate)
+        self.value_pub4.publish(self.nowCV)
+
+    def mode2(self):
+        speed=0
+        Vx=0.0
+        Vy=0.0
+        yaw_rate = 0.0
+        if self.path_first_flg == True and self.odom_first_flg == True:
+
+            #Target point calculation
+            dist_from_current_pos_np = np.sqrt(np.power((self.path_x_np-self.current_x),2) + np.power((self.path_y_np-self.current_y),2))
+            for i in range(len(self.tld)):
+                print (i,dist_from_current_pos_np[i])
+                dist_sp_from_nearest=self.tld[i]
+                self.nowCV=self.curvature_val[i]
+                speed=math.fabs(self.target_LookahedDist-self.map(self.nowCV,self.minCV,self.maxCV,self.target_speed_min,self.target_speed_max))
+                if (dist_from_current_pos_np[i]) > self.tld[i]:
+                    self.target_lookahed_x = self.path_x_np[i]
+                    self.target_lookahed_y = self.path_y_np[i]
+                    self.path_x_np=self.path_x_np[i:len(self.path_x_np)]
+                    self.path_y_np=self.path_y_np[i:len(self.path_y_np)]
+                    self.tld=self.tld[i:len(self.tld)]
+                    self.curvature_val=self.curvature_val[i:len(self.curvature_val)]
+                    self.cflag=True
+                    break
+                if self.cflag==False and np.amax(dist_sp_from_nearest)<=self.GOAL_LIMIT:#check goal
+                    self.gflag=True
+            target_lookahed_x=self.target_lookahed_x
+            target_lookahed_y=self.target_lookahed_y
+            #End processing
+            if self.gflag:
+                cmd_vel = Twist()
+                self.cmdvel_pub.publish(cmd_vel)
+                self.path_first_flg = False
+                rospy.loginfo("goal!!")
+                return
+            #calculate target yaw rate
+            if self.cflag:
+                self.target_yaw = math.atan2(target_lookahed_y-self.current_y,target_lookahed_x-self.current_x)
+                self.oldspeed=speed
+                self.cflag=False
+            else:
+                self.dist=math.sqrt((self.target_lookahed_x-self.current_x)**2+(self.target_lookahed_y-self.current_y)**2)
+                speed=self.map(self.dist,0,self.target_LookahedDist,self.target_speed_min,self.oldspeed)
+                if self.dist <= self.GOAL_LIMIT:
+                    self.gflag=True
+            target_yaw=self.target_yaw
+
+            #Set Cmdvel
+            if self.first:
+                self.first=False
+            elif not self.first:
+                if speed>(self.target_speed_max):
+                    speed=self.target_speed_max
+                elif speed<(self.target_speed_min):
+                    speed=self.target_speed_min
+            else:
+                speed=0
+
+            Vx=speed*math.cos(target_yaw)
+            Vy=speed*math.sin(target_yaw)
+
+            cmd_vel = Twist()
+            cmd_vel.linear.x = Vx    #[m/s]
+            cmd_vel.linear.y = Vy
+            cmd_vel.linear.z = 0.0
+            cmd_vel.angular.x = 0.0
+            cmd_vel.angular.y = 0.0
+            cmd_vel.angular.z = 0.0
+            self.cmdvel_pub.publish(cmd_vel)
+
+            rospy.loginfo("Speed:"+str(speed)+"[m/s],Yaw:"+str(target_yaw)+"[rad],tld size:"+str(len(self.tld))+",dist:"+str(self.dist)+"[m]")
+
+            #publish maker
+            self.publish_lookahed_marker(target_lookahed_x,target_lookahed_y,target_yaw)
+        #debug
+        self.value_pub1.publish(Vx)
+        self.value_pub2.publish(Vy)
+        self.value_pub3.publish(0.0)
+        self.value_pub4.publish(self.nowCV)
+
+    ###################
+    # Update cmd_vel  #
+    ###################
+    def update_cmd_vel(self):
+        self.cb_get_odometry()
+        if self.MODE == mode.ROTATION:
+            self.mode1()
+        else:
+            self.mode2()
         self.r.sleep()
-
-
 
     ####################################
     # Callback for receiving Odometry  #
@@ -289,12 +367,9 @@ class Simple_path_follower():
             yy_t = np.gradient(y_t)
             self.curvature_val = np.abs(xx_t * y_t - x_t * yy_t) / (x_t * x_t + y_t * y_t)**1.5
             print self.curvature_val
-            #plt.plot(self.curvature_val)
-            #plt.show()
             self.tld=[]
             for i in self.curvature_val:
                 self.tld.append(math.fabs(self.target_LookahedDist-self.map(i,0,np.amax(self.curvature_val),0,self.target_LookahedDist-0.2)))
-            #plt.plot(self.path_st_np)
             plt.plot(self.curvature_val)
             plt.plot(self.tld)
             plt.show()
