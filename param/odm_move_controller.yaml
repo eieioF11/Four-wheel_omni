@@ -1,19 +1,19 @@
 joint_controller0:
-  type: effort_controllers/JointVelocityController
+  type: velocity_controllers/JointVelocityController
   joint: wheel0_joint
-  pid: {p: 0.05, i: 0.0, d: 0.0001, i_clamp: 1.0, antiwindup: true}
+  pid: {p: 2450.0, i: 0.0, d: 0.0001}
 
 joint_controller1:
-  type: effort_controllers/JointVelocityController
+  type: velocity_controllers/JointVelocityController
   joint: wheel1_joint
-  pid: {p: 0.05, i: 0.0, d: 0.0001, i_clamp: 1.0, antiwindup: true}
+  pid: {p: 2450.0, i: 0.0, d: 0.0001}
 
 joint_controller2:
-  type: effort_controllers/JointVelocityController
+  type: velocity_controllers/JointVelocityController
   joint: wheel2_joint
-  pid: {p: 0.05, i: 0.0, d: 0.0001, i_clamp: 1.0, antiwindup: true}
+  pid: {p: 2450.0, i: 0.0, d: 0.0001}
 
 joint_controller3:
-  type: effort_controllers/JointVelocityController
+  type: velocity_controllers/JointVelocityController
   joint: wheel3_joint
-  pid: {p: 0.05, i: 0.0, d: 0.0001, i_clamp: 1.0, antiwindup: true}
+  pid: {p: 2450.0, i: 0.0, d: 0.0001}

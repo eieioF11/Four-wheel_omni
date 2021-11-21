@@ -19,7 +19,7 @@
 			<parent link="${parent}"/>
 			<child  link="${prefix}_link"/>
 			<insert_block name="joint_axis"/>
-		</joint>
+		</joint><!--
 		<transmission name="${prefix}_trans">
 			<type>transmission_interface/SimpleTransmission</type>
 			<joint name="${prefix}_joint">
@@ -27,6 +27,16 @@
 			</joint>
 			<actuator name="${prefix}_motor">
 				<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+				<mechanismReduction>1</mechanismReduction>
+			</actuator>
+		</transmission>-->
+		<transmission name="${prefix}_trans">
+			<type>transmission_interface/SimpleTransmission</type>
+			<joint name="${prefix}_joint">
+				<hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+			</joint>
+			<actuator name="${prefix}_motor">
+				<hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
 				<mechanismReduction>1</mechanismReduction>
 			</actuator>
 		</transmission>
@@ -112,18 +122,18 @@
 
 	<gazebo>
 		<plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
-		<robotNamespace>/OmuniRobot</robotNamespace>
-		<!--
-		<robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>-->
-		<legacyModeNS>true</legacyModeNS>
+			<robotNamespace>/OmuniRobot</robotNamespace>
+			<!--
+			<robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>-->
+			<legacyModeNS>true</legacyModeNS>
 		</plugin>
 	</gazebo>
 	<gazebo>
 		<plugin name="ground_truth" filename="libgazebo_ros_p3d.so">
-		<frameName>world</frameName>
-		<bodyName>base_link</bodyName>
-		<topicName>/tracker</topicName>
-		<updateRate>10.0</updateRate>
+			<frameName>world</frameName>
+			<bodyName>base_link</bodyName>
+			<topicName>/tracker</topicName>
+			<updateRate>10.0</updateRate>
 		</plugin>
 	</gazebo>
 </robot>

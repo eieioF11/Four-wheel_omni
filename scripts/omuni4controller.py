@@ -35,12 +35,14 @@ class omuni4():
         self.c3 = rospy.Publisher("/OmuniRobot/joint_controller3/command", Float64, queue_size=5)
 
         self.odom = rospy.Publisher("/odom", Odometry, queue_size=5)
+        self.odom_wheel = rospy.Publisher("/OmuniRobot/odom", Odometry, queue_size=5)
         #initialize subscriber
         self.cmd_sub = rospy.Subscriber("/cmd_vel",Twist, self.get_cmd)
-        self.state0_sub = rospy.Subscriber("/OmuniRobot/joint_controller0/state",JointControllerState, self.get_state0)
-        self.state1_sub = rospy.Subscriber("/OmuniRobot/joint_controller1/state",JointControllerState, self.get_state1)
-        self.state2_sub = rospy.Subscriber("/OmuniRobot/joint_controller2/state",JointControllerState, self.get_state2)
-        self.state3_sub = rospy.Subscriber("/OmuniRobot/joint_controller3/state",JointControllerState, self.get_state3)
+        #self.state0_sub = rospy.Subscriber("/OmuniRobot/joint_controller0/state",JointControllerState, self.get_state0)
+        #self.state1_sub = rospy.Subscriber("/OmuniRobot/joint_controller1/state",JointControllerState, self.get_state1)
+        #self.state2_sub = rospy.Subscriber("/OmuniRobot/joint_controller2/state",JointControllerState, self.get_state2)
+        #self.state3_sub = rospy.Subscriber("/OmuniRobot/joint_controller3/state",JointControllerState, self.get_state3)
+        self.gazebo_states_sub = rospy.Subscriber("/tracker",Odometry, self.get_gazebo_states)
 
         self.w0=0.0
         self.w1=0.0
@@ -62,18 +64,18 @@ class omuni4():
         w1=-Vx+Angular
         w2=-Vy+Angular
         w3=Vx+Angular
-        rospy.loginfo("w(%f,%f,%f,%f)",w0,w1,w2,w3)
+        #rospy.loginfo("w(%f,%f,%f,%f)",w0,w1,w2,w3)
         self.c0.publish(w0)
         self.c1.publish(w1)
         self.c2.publish(w2)
         self.c3.publish(w3)
 
     def move_90(self,Vx,Vy,Angular):
-        w0=(-Vx+Vy)/2.0+Angular
-        w1=( Vx+Vy)/2.0+Angular
-        w2=( Vx-Vy)/2.0+Angular
-        w3=(-Vx-Vy)/2.0+Angular
-        rospy.loginfo("w(%f,%f,%f,%f)",w0,w1,w2,w3)
+        w0=( Vx+Vy)/2.0-Angular
+        w1=(-Vx+Vy)/2.0-Angular
+        w2=(-Vx-Vy)/2.0-Angular
+        w3=( Vx-Vy)/2.0-Angular
+        #rospy.loginfo("w(%f,%f,%f,%f)",w0,w1,w2,w3)
         self.c0.publish(w0)
         self.c1.publish(w1)
         self.c2.publish(w2)
@@ -98,10 +100,37 @@ class omuni4():
         #rospy.loginfo("state3:%f",value.process_value)
         self.w3=value.process_value
 
+    def get_gazebo_states(self,value):
+        current_time = rospy.Time.now()
+        #rospy.loginfo("state3:%f",value.process_value)
+        self.tracker=value
+        #print(value.pose.pose.position.x,value.pose.pose.position.y)
+        # first, we'll publish the transform over tf
+        self.odom_broadcaster.sendTransform(
+            (value.pose.pose.position.x,value.pose.pose.position.y, 0.),
+            (value.pose.pose.orientation.x, value.pose.pose.orientation.y, value.pose.pose.orientation.z, value.pose.pose.orientation.w),
+            current_time,
+            "base_link",
+            "odom"
+        )
+
+        odom = Odometry()
+        odom.header.stamp = current_time
+        odom.header.frame_id = "odom"
+        # set the position
+        odom.pose.pose = value.pose.pose
+
+        # set the velocity
+        odom.child_frame_id = "base_link"
+        odom.twist.twist = value.twist.twist
+
+        # publish the message
+        self.odom.publish(odom)
+
     def calculate_odom(self):
         current_time = rospy.Time.now()
-        self.vx=self.R*((self.w0-self.w2)+(self.w3-self.w1))
-        self.vy=self.R*((self.w0-self.w2)-(self.w3-self.w1))
+        self.vx=self.R*((self.w0-self.w2)+(self.w3-self.w1))*2.0
+        self.vy=self.R*((self.w0-self.w2)-(self.w3-self.w1))*2.0
         self.vth=(self.R/(4.0*self.L))*(self.w0+self.w1+self.w2+self.w3)
         # compute odometry in a typical way given the velocities of the robot
         dt = (current_time - self.last_time).to_sec()
@@ -116,14 +145,14 @@ class omuni4():
         # since all odometry is 6DOF we'll need a quaternion created from yaw
         odom_quat = tf.transformations.quaternion_from_euler(0, 0, self.th)
 
-        # first, we'll publish the transform over tf
-        self.odom_broadcaster.sendTransform(
-            (self.x, self.y, 0.),
-            odom_quat,
-            current_time,
-            "base_link",
-            "odom"
-        )
+        ## first, we'll publish the transform over tf
+        #self.odom_broadcaster.sendTransform(
+        #    (self.x, self.y, 0.),
+        #    odom_quat,
+        #    current_time,
+        #    "base_link",
+        #    "odom"
+        #)
 
         odom = Odometry()
         odom.header.stamp = current_time
@@ -136,7 +165,7 @@ class omuni4():
         odom.twist.twist = Twist(Vector3(self.vx, self.vy, 0), Vector3(0, 0, self.vth))
 
         # publish the message
-        self.odom.publish(odom)
+        self.odom_wheel.publish(odom)
 
         self.last_time = current_time
         self.r.sleep()
