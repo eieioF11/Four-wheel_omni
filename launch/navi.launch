@@ -20,10 +20,10 @@
 
 
 	<!-- Path Planner-->
-	<node pkg="F11Robo" type="PathPlanner.py" name="PathPlanner" output="screen"/>
+	<node pkg="Four-wheel_omni" type="PathPlanner.py" name="PathPlanner" output="screen"/>
 
 	<!-- Path Follower -->
-	<node pkg="F11Robo" type="PurePursuit.py" name="PurePursuit" output="screen"/>
+	<node pkg="Four-wheel_omni" type="PurePursuit.py" name="PurePursuit" output="screen"/>
 
 	<node pkg="jsk_rviz_plugins"
 			type="rosconsole_overlay_text.py"
