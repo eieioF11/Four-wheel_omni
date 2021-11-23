@@ -1,16 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
 	<arg name="model" default="$(find Four-wheel_omni)/xacro/OmuniRobot.xacro" />
+	<arg name="Field" default="none"/>
+
 	<param name="robot_description" command="$(find xacro)/xacro $(arg model) --inorder"/>
 
-	<include file="$(find gazebo_ros)/launch/empty_world.launch">
-		<arg name="paused" value="false"/>
-		<arg name="use_sim_time" value="true"/>
-		<arg name="gui" value="true"/>
-		<arg name="headless" value="false"/>
-		<arg name="debug" value="false"/>
-		<arg name="world_name" value="$(find Four-wheel_omni)/world/world_CG.world"/>
-	</include>
+	<group if="$(eval Field == 'Red')">
+		<include file="$(find gazebo_ros)/launch/empty_world.launch">
+			<arg name="paused" value="false"/>
+			<arg name="use_sim_time" value="true"/>
+			<arg name="gui" value="true"/>
+			<arg name="headless" value="false"/>
+			<arg name="debug" value="false"/>
+			<arg name="world_name" value="$(find Four-wheel_omni)/world/world_Red.world"/>
+		</include>
+	</group>
+	<group if="$(eval Field == 'Blue')">
+		<include file="$(find gazebo_ros)/launch/empty_world.launch">
+			<arg name="paused" value="false"/>
+			<arg name="use_sim_time" value="true"/>
+			<arg name="gui" value="true"/>
+			<arg name="headless" value="false"/>
+			<arg name="debug" value="false"/>
+			<arg name="world_name" value="$(find Four-wheel_omni)/world/world_Blue.world"/>
+		</include>
+	</group>
+	<group if="$(eval Field == 'none')">
+		<include file="$(find gazebo_ros)/launch/empty_world.launch">
+			<arg name="paused" value="false"/>
+			<arg name="use_sim_time" value="true"/>
+			<arg name="gui" value="true"/>
+			<arg name="headless" value="false"/>
+			<arg name="debug" value="false"/>
+			<arg name="world_name" value="$(find Four-wheel_omni)/world/world_CG.world"/>
+		</include>
+	</group>
+
 
 	<node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model OmuniRobot" />
 
