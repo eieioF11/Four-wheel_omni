@@ -47,6 +47,9 @@
 			args="joint_controller0 joint_controller1 joint_controller2 joint_controller3 joint_state_controller"/>
 	<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen" ns="/OmuniRobot"/>
 
+	<!-- Controller -->
+	<node pkg="Four-wheel_omni" type="omuni4controller.py" name="omuni4controller" output="screen"/>
+
     <!-- robot localization --><!--
     <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se" clear_params="true" output="screen">
         <rosparam command="load" file="$(find Four-wheel_omni)/param/EKF_params.yaml" />
