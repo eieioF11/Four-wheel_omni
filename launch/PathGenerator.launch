@@ -1,0 +1,27 @@
+<launch>
+	<!-- Arguments -->
+	<arg name="Field" default="none"/>
+	<arg name="map_file" default="$(find Four-wheel_omni)/map/map_world_CG.yaml"/>
+	<arg name="open_rviz" default="true"/>
+
+	<!-- odom -->
+	<group if="$(eval Field == 'Red')">
+		<!-- Map server -->
+		<node pkg="map_server" name="map_server" type="map_server" args="$(find Four-wheel_omni)/map/map_world_Red.yaml"/>
+	</group>
+	<group if="$(eval Field == 'Blue')">
+		<!-- Map server -->
+		<node pkg="map_server" name="map_server" type="map_server" args="$(find Four-wheel_omni)/map/map_world_Blue.yaml"/>
+	</group>
+	<group if="$(eval Field == 'none')">
+		<!-- Map server -->
+		<node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
+	</group>
+	<!--Path Generator-->
+	<node pkg="Four-wheel_omni" type="PathGenerator.py" name="PathGenerator" output="screen"/>
+	<!-- rviz -->
+	<group if="$(arg open_rviz)">
+		<node pkg="rviz" type="rviz" name="rviz" required="true"
+			args="-d $(find Four-wheel_omni)/rviz/odom_gazebo.rviz"/>
+	</group>
+</launch>
