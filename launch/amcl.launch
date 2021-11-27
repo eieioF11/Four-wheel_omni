@@ -8,39 +8,39 @@
 	<!-- AMCL -->
 	<node pkg="amcl" type="amcl" name="amcl">
 
-		<param name="min_particles"             value="500"/>
-		<param name="max_particles"             value="3000"/>
-		<param name="kld_err"                   value="0.02"/>
-		<param name="update_min_d"              value="0.20"/>
-		<param name="update_min_a"              value="0.20"/>
-		<param name="resample_interval"         value="1"/>
-		<param name="transform_tolerance"       value="0.5"/>
-		<param name="recovery_alpha_slow"       value="0.00"/>
-		<param name="recovery_alpha_fast"       value="0.00"/>
-		<param name="initial_pose_x"            value="$(arg initial_pose_x)"/>
+		<param name="min_particles"             value="500"/><!--パーティクルフィルタで使用するパーティクル数の最小値-->
+		<param name="max_particles"             value="3000"/><!--パーティクルフィルタで使用するパーティクル数の最大値-->
+		<param name="kld_err"                   value="0.02"/><!--真値と推定値との誤差-->
+		<param name="update_min_d"              value="0.20"/><!--update_min_d[m]前進する毎にフィルタをアップデート（同じ姿勢で度々パーディクルの尤度が更新されることを防ぐため）-->
+		<param name="update_min_a"              value="0.20"/><!--update_min_a[rad]回転する毎にフィルタをアップデート（同じ姿勢で度々パーディクルの尤度が更新されることを防ぐため）-->
+		<param name="resample_interval"         value="1"/><!--パーティクルをリサンプルする間隔。パーティクルフィルタでは、各パーティクルの尤度にある程度のばらつきが生じた時点でリサンプリングが行われる（その際に、尤度が低いパーティクルが消去される）-->
+		<param name="transform_tolerance"       value="0.5"/><!--センサデータやtfなどのtimestampと現在時刻とのズレの許容範囲 センサデータの更新が無い場合には処理が停止してしまうのではないかと思われる[sec]-->
+		<param name="recovery_alpha_slow"       value="0.00"/><!--ランダムパーティクルをばら撒くことでのリカバリを試みる。0.0で無効に ROS Wikiでの推奨値は0.001-->
+		<param name="recovery_alpha_fast"       value="0.00"/><!--ランダムパーティクルをばら撒くことでのリカバリを試みる。0.0で無効に ROS Wikiでの推奨値は0.1-->
+		<param name="initial_pose_x"            value="$(arg initial_pose_x)"/><!--ロボットの初期姿勢 x, y, yaw-->
 		<param name="initial_pose_y"            value="$(arg initial_pose_y)"/>
 		<param name="initial_pose_a"            value="$(arg initial_pose_a)"/>
-		<param name="gui_publish_rate"          value="50.0"/>
-
+		<param name="gui_publish_rate"          value="50.0"/><!--rviz等で可視化するためにpublishされるトピックの周波数[Hz]-->
+		<!--LiDARによる尤度更新に関するパラメータ-->
 		<remap from="scan"                      to="$(arg scan_topic)"/>
-		<param name="laser_max_range"           value="3.5"/>
-		<param name="laser_max_beams"           value="180"/>
-		<param name="laser_z_hit"               value="0.5"/>
-		<param name="laser_z_short"             value="0.05"/>
-		<param name="laser_z_max"               value="0.05"/>
-		<param name="laser_z_rand"              value="0.5"/>
-		<param name="laser_sigma_hit"           value="0.2"/>
-		<param name="laser_lambda_short"        value="0.1"/>
-		<param name="laser_likelihood_max_dist" value="2.0"/>
-		<param name="laser_model_type"          value="likelihood_field"/>
-
-		<param name="odom_model_type"           value="diff"/>
-		<param name="odom_alpha1"               value="0.1"/>
-		<param name="odom_alpha2"               value="0.1"/>
-		<param name="odom_alpha3"               value="0.1"/>
-		<param name="odom_alpha4"               value="0.1"/>
-		<param name="odom_frame_id"             value="odom"/>
-		<param name="base_frame_id"             value="base_link"/>
-
+		<param name="laser_max_range"           value="3.5"/><!--最大スキャン範囲-->
+		<param name="laser_max_beams"           value="180"/><!--フィルタの更新時に各スキャンでどのように多くの等間隔のビームが使用される-->
+		<param name="laser_z_hit"               value="0.5"/><!--Laserが地図に記載されている障害物に正しくhitし、その距離を観測する確率-->
+		<param name="laser_z_short"             value="0.05"/><!--地図にはない障害物を検出して、地図とロボットの現在姿勢から導き出される想定観測距離よりも短い計測値を観測する確率-->
+		<param name="laser_z_max"               value="0.05"/><!--レーザの反射光を受信できない等の計測失敗により、計測値が計測可能レンジの最大値をとってしまう確率-->
+		<param name="laser_z_rand"              value="0.5"/><!--原因不明のランダムな雑音が発生する確率-->
+		<param name="laser_sigma_hit"           value="0.2"/><!--レーザが正しい値を計測するとき、その計測値の分布をガウス分布で表現する その時の分散の値-->
+		<param name="laser_lambda_short"        value="0.1"/><!--レーザが地図に無い障害物などにより正しい値よりも低い値を取るとき、その確率の分布は指数関数を表す（ロボットに近い物体を検出する確率が高く、ロボットから遠い物体を検出する確率は低い）その指数関数の形状を決定する変数-->
+		<param name="laser_likelihood_max_dist" value="2.0"/><!--最大距離はlikelihood_fieldモデルで使用するために、地図上に障害物インフレを行うため-->
+		<param name="laser_model_type"          value="likelihood_field"/><!--どのモデルを使用すると、ビームまたはlikelihood_fieldどちらか-->
+		<!--ロボットの移動モデルについてのパラメータ-->
+		<param name="odom_model_type"           value="diff"/><!--オドメトリのデータタイプ ”diff”, “omni”, “diff-corrected” or “omni-corrected”のタイプがある-->
+		<param name="odom_alpha1"               value="0.1"/><!--ロボットの回転運動によるオドメトリの回転成分のズレ-->
+		<param name="odom_alpha2"               value="0.1"/><!--ロボットの回転運動によるオドメトリの並進成分のズレ-->
+		<param name="odom_alpha3"               value="0.1"/><!--ロボットの並進運動によるオドメトリの並進成分のズレ-->
+		<param name="odom_alpha4"               value="0.1"/><!--ロボットの並進運動によるオドメトリの回転成分のズレ-->
+		<param name="odom_frame_id"             value="odom"/><!--オドメトリのデータのトピック名の指定-->
+		<param name="base_frame_id"             value="base_link"/><!--ロボットの足元のframe-->
+		<!--参考　https://sy-base.com/myrobotics/ros/ros-amcl/　-->
 	</node>
 </launch>
