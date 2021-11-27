@@ -148,7 +148,7 @@ class Map(object):
 					else:
 						tem[j,i]=map[i,j]
 			#cost map作成
-			n=10
+			n=5
 			rn=3+2*(n-1)
 			print rn
 			for i in range(col):
