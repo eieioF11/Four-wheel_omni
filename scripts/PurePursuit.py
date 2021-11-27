@@ -249,16 +249,9 @@ class Simple_path_follower():
                     self.gflag=True
             target_lookahed_x=self.target_lookahed_x
             target_lookahed_y=self.target_lookahed_y
-            #End processing
-            if self.gflag:
-                cmd_vel = Twist()
-                self.cmdvel_pub.publish(cmd_vel)
-                self.path_first_flg = False
-                rospy.loginfo("goal!!")
-                return
             #calculate target yaw rate
+            self.target_yaw = math.atan2(target_lookahed_y-self.current_y,target_lookahed_x-self.current_x)
             if self.cflag:
-                self.target_yaw = math.atan2(target_lookahed_y-self.current_y,target_lookahed_x-self.current_x)
                 self.oldspeed=speed
                 self.cflag=False
             else:
@@ -267,6 +260,14 @@ class Simple_path_follower():
                 if self.dist <= self.GOAL_LIMIT:
                     self.gflag=True
             target_yaw=self.target_yaw
+            #End processing
+            if self.gflag:
+                cmd_vel = Twist()
+                self.cmdvel_pub.publish(cmd_vel)
+                self.path_first_flg = False
+                rospy.loginfo("dist:"+str(self.dist)+"[m]")
+                rospy.loginfo("goal!!")
+                return
 
             #Set Cmdvel
             if self.first:
