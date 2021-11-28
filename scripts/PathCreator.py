@@ -2,7 +2,11 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from scipy.special import comb
+import pandas as pd
 import matplotlib.pyplot as plt
+import glob
+import os
+
 import rospy
 from nav_msgs.msg import Path
 from std_msgs.msg import Header
@@ -17,6 +21,21 @@ class path_creator():
         self.dot=[]
         self.end=False
         self.start=start
+
+    def save_csv(self):
+        # Save CSV path file
+        cols = ["x", "y"]
+        df = pd.DataFrame(self.ros_path,columns=cols)
+        print(df)
+        fpath=os.environ['HOME']+"/catkin_ws/src/Four-wheel_omni/scripts/csv/"
+        fname=[]
+        for f in glob.glob(fpath+'*.csv'):
+            fname.append(int(os.path.splitext(os.path.basename(f))[0]))
+        print(fname)
+        n=0
+        if len(fname):
+            n=max(fname)+1
+        df.to_csv(fpath+str(n)+".csv",index=False)
 
     def motion(self,event):
         x = event.xdata
@@ -60,6 +79,7 @@ class path_creator():
             #経路配信
             self.ros_path=self.path_generation(self.path,self.index_ox,self.index_oy,self.resolution)
             self.end=True
+            self.save_csv()
             plt.title("Path generation is completed!")
         if event.key == 'i':
             if self.path==[]:
@@ -132,7 +152,7 @@ class path_creator():
         path_header.seq = 0
         path_header.stamp = rospy.Time.now()
         path_header.frame_id = "map"
-
+        ros_path=[]
         for i in range(0,len(sPath)):
             temp_pose = PoseStamped()
             temp_pose.pose.position.x = (sPath[i][0]-ox)*resolution
@@ -141,11 +161,12 @@ class path_creator():
             temp_pose.header = path_header
             temp_pose.header.seq = i
             path.poses.append(temp_pose)
+            ros_path.append([(sPath[i][0]-ox)*resolution,(sPath[i][1]-oy)*resolution])
         #print path.poses
         path.header = path_header
         self.path_pub.publish(path)
         rospy.loginfo('End path generation')
-        return path
+        return ros_path
 
 
     def create(self,map):
