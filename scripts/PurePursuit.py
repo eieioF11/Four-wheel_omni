@@ -13,7 +13,7 @@ from visualization_msgs.msg import Marker
 from nav_msgs.msg import Path, Odometry
 
 from jsk_rviz_plugins.msg import *
-from std_msgs.msg import ColorRGBA, Float32
+from std_msgs.msg import ColorRGBA, Float32 ,Bool
 
 import matplotlib.pyplot as plt
 
@@ -57,6 +57,7 @@ class Simple_path_follower():
         self.value_pub2 = rospy.Publisher("CMD_Vy", Float32, queue_size=1)
         self.value_pub3 = rospy.Publisher("CMD_Az", Float32, queue_size=1)
         self.value_pub4 = rospy.Publisher("Curvature_val", Float32, queue_size=1)
+        self.end_pub = rospy.Publisher("move_end", Bool, queue_size=1)
 
         #initialize subscriber
         self.path_sub = rospy.Subscriber("/path", Path, self.cb_get_path_topic_subscriber)
@@ -213,7 +214,6 @@ class Simple_path_follower():
             self.cmdvel_pub.publish(cmd_vel)
 
             rospy.loginfo(str(self.first)+","+str(yaw_diff*180/math.pi)+","+str(target_yaw*180/math.pi)+","+str(self.current_yaw_euler*180/math.pi)+",tld size:"+str(len(self.tld))+",dist:"+str(self.dist))
-
             #publish maker
             self.publish_lookahed_marker(target_lookahed_x,target_lookahed_y,target_yaw)
         #debug
@@ -293,7 +293,6 @@ class Simple_path_follower():
             self.cmdvel_pub.publish(cmd_vel)
 
             rospy.loginfo("Speed:"+str(speed)+"[m/s],Yaw:"+str(target_yaw)+"[rad],tld size:"+str(len(self.tld))+",dist:"+str(self.dist)+"[m]")
-
             #publish maker
             self.publish_lookahed_marker(target_lookahed_x,target_lookahed_y,target_yaw)
         #debug
@@ -371,13 +370,14 @@ class Simple_path_follower():
             self.tld=[]
             for i in self.curvature_val:
                 self.tld.append(math.fabs(self.target_LookahedDist-self.map(i,0,np.amax(self.curvature_val),0,self.target_LookahedDist-0.2)))
-            plt.plot(self.curvature_val)
-            plt.plot(self.tld)
-            plt.show()
+            #plt.plot(self.curvature_val)
+            #plt.plot(self.tld)
+            #plt.show()
             self.cur_diff=np.amax(self.curvature_val)-np.amin(self.curvature_val)#曲率最大最小の差
             self.maxCV=np.amax(self.curvature_val)
             self.minCV=np.amin(self.curvature_val)
             self.first = self.path_first_flg = True
+            self.end_pub.publish(True)
             self.gflag=False
             rospy.loginfo("get path")
 

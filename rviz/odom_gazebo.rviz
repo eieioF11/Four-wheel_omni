@@ -366,7 +366,7 @@ Visualization Manager:
       Marker Topic: /lookahed_marker
       Name: Marker
       Namespaces:
-        {}
+        my_name_space: true
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -513,6 +513,29 @@ Visualization Manager:
       text size: 11
       top: 0
       width: 900
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz/Path
+      Color: 25; 255; 0
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Lines
+      Line Width: 0.029999999329447746
+      Name: Path
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
+      Topic: /path_now
+      Unreliable: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -548,9 +571,9 @@ Visualization Manager:
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.5655936002731323
-        Y: 0.022031545639038086
-        Z: 2.384185791015625e-7
+        X: -1.4522638320922852
+        Y: 6.038705348968506
+        Z: 7.152557373046875e-7
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
@@ -579,5 +602,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1920
-  X: 0
+  X: 1920
   Y: 28
