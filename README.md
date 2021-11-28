@@ -67,6 +67,10 @@ roslaunch Four-wheel_omni PathGenerator.launch Field:=Red
 ```bash
 roslaunch Four-wheel_omni PathGenerator.launch Field:=Blue
 ```
+## csvの経路配信
+```bash
+rosrun Four-wheel_omni PathPublisher.py
+```
 ## 問題対処法メモ
 フィールドを指定した場合にworldに何も表示されないときは以下のコマンドを入力
 ```bash
