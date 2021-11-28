@@ -44,6 +44,15 @@ roslaunch urdf_tutorial display.launch model:=OmuniRobot.xacro
 ```bash
 roslaunch Four-wheel_omni navi.launch
 ```
+### フィールドを指定する場合
+スタートゾーンの色が赤の場合
+```bash
+roslaunch Four-wheel_omni navi.launch Field:=Red
+```
+スタートゾーンの色が青の場合
+```bash
+roslaunch Four-wheel_omni navi.launch Field:=Blue
+```
 ## 経路生成
 手動で経路を引く場合の経路生成ツール
 ```bash
@@ -57,15 +66,6 @@ roslaunch Four-wheel_omni PathGenerator.launch Field:=Red
 スタートゾーンの色が青の場合
 ```bash
 roslaunch Four-wheel_omni PathGenerator.launch Field:=Blue
-```
-### フィールドを指定する場合
-スタートゾーンの色が赤の場合
-```bash
-roslaunch Four-wheel_omni navi.launch Field:=Red
-```
-スタートゾーンの色が青の場合
-```bash
-roslaunch Four-wheel_omni navi.launch Field:=Blue
 ```
 ## 問題対処法メモ
 フィールドを指定した場合にworldに何も表示されないときは以下のコマンドを入力
