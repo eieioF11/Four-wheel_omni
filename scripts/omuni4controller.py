@@ -19,6 +19,7 @@ class omuni4():
         # Parameter
         self.R=0.03
         self.L=0.1*sqrt(2) #0.1414...
+        self.Adjust=50.0 #1.0
         # Initialization
         rospy.init_node('Simple_Path_Follower', anonymous=True)
         rospy.loginfo("R:%f,L:%f",self.R,self.L)
@@ -71,10 +72,11 @@ class omuni4():
         self.c3.publish(w3)
 
     def move_90(self,Vx,Vy,Angular):
-        w0=( Vx+Vy)/2.0-Angular
-        w1=(-Vx+Vy)/2.0-Angular
-        w2=(-Vx-Vy)/2.0-Angular
-        w3=( Vx-Vy)/2.0-Angular
+        Angular=Angular/10.0
+        w0=(( Vx+Vy)/2.0-Angular)*self.Adjust
+        w1=((-Vx+Vy)/2.0-Angular)*self.Adjust
+        w2=((-Vx-Vy)/2.0-Angular)*self.Adjust
+        w3=(( Vx-Vy)/2.0-Angular)*self.Adjust
         #rospy.loginfo("w(%f,%f,%f,%f)",w0,w1,w2,w3)
         self.c0.publish(w0)
         self.c1.publish(w1)
