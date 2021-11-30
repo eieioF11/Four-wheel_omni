@@ -37,8 +37,8 @@ class Simple_path_follower():
         rospy.init_node('Simple_Path_Follower', anonymous=True)
         self.r = rospy.Rate(50)  # 50hz
 
-        self.target_speed_max = 20.0            #target speed [km/h]
-        self.target_speed_min = 10.0
+        self.target_speed_max = 1.0            #target speed [m/h]
+        self.target_speed_min = 0.5
         self.target_LookahedDist = 0.5      #Lookahed distance for Pure Pursuit[m]
 
         self.GOAL_LIMIT = 0.02
