@@ -13,7 +13,7 @@ from std_msgs.msg import Header
 from geometry_msgs.msg import PoseStamped
 
 class path_creator():
-    def __init__(self,path_pub,index_ox,index_oy,resolution,start):
+    def __init__(self,path_pub,index_ox,index_oy,resolution,start,field):
         self.path_pub=path_pub
         self.index_ox=index_ox
         self.index_oy=index_oy
@@ -21,6 +21,7 @@ class path_creator():
         self.dot=[]
         self.end=False
         self.start=start
+        self.field=field
 
     def save_csv(self):
         # Save CSV path file
@@ -175,8 +176,21 @@ class path_creator():
         self.ln_v = plt.axvline(0)
         self.ln_h = plt.axhline(0)
         self.path=[]
-        #plt.xlim(0,10)
-        #plt.ylim(0,10)
+        if self.field=="r":
+            x=970
+            y=970
+            w=270
+            h=150
+            plt.xlim(x,x+w)
+            plt.ylim(y+h,y)
+        elif self.field=="b":
+            x=970
+            y=880
+            w=270
+            h=150
+            plt.xlim(x,x+w)
+            plt.ylim(y+h,y)
+        #plt.imshow(self.map[y:y+h,x:x+w])
         plt.imshow(self.map)
         plt.title("Initial position addition with i key")
         plt.connect('motion_notify_event', self.motion)

@@ -18,7 +18,18 @@
 		<node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
 	</group>
 	<!--Path Generator-->
-	<node pkg="Four-wheel_omni" type="PathGenerator.py" name="PathGenerator" output="screen"/>
+	<group if="$(eval Field == 'Red')">
+		<!-- Map server -->
+		<node pkg="Four-wheel_omni" type="PathGenerator.py" name="PathGenerator" output="screen" args="r"/>
+	</group>
+	<group if="$(eval Field == 'Blue')">
+		<!-- Map server -->
+		<node pkg="Four-wheel_omni" type="PathGenerator.py" name="PathGenerator" output="screen" args="b"/>
+	</group>
+	<group if="$(eval Field == 'none')">
+		<!-- Map server -->
+		<node pkg="Four-wheel_omni" type="PathGenerator.py" name="PathGenerator" output="screen"/>
+	</group>
 	<!-- rviz -->
 	<group if="$(arg open_rviz)">
 		<node pkg="rviz" type="rviz" name="rviz" required="true"

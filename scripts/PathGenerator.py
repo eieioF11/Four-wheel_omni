@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+import sys
 import rospy
 import numpy as np
 import matplotlib.pyplot as plt
@@ -31,7 +31,7 @@ listener = tf2_ros.TransformListener(tfBuffer)
 
 #Map
 class Map(object):
-	def __init__(self):
+	def __init__(self,f):
 	#rospySubscribe to the map topic, the second is the data type, the third is the callback function
 	# Pass the subscribed data to the callback function, which is the mapmsg variable
 	#If a topic comes, call the callback function directly
@@ -39,6 +39,7 @@ class Map(object):
 		print "get map~"
 		#The output below is the address, not the data
 		print self.map_sub
+		self.f=f
 
 	#The definition of the callback function, passed mapmsg
 	def callback(self,mapmsg):
@@ -74,7 +75,8 @@ class Map(object):
 			print e
 			rospy.loginfo('convert rgb image error')
 		tem[int(-1*ox/mapmsg.info.resolution),int(-1*oy/mapmsg.info.resolution)]=-255
-		Pcreat=path_creator(path_pub,index_ox,index_oy,mapmsg.info.resolution,[int(-1*ox/mapmsg.info.resolution),int(-1*oy/mapmsg.info.resolution)])
+		print("Field:",self.f)
+		Pcreat=path_creator(path_pub,index_ox,index_oy,mapmsg.info.resolution,[int(-1*ox/mapmsg.info.resolution),int(-1*oy/mapmsg.info.resolution)],self.f)
 		global readgoal
 		rospy.loginfo('Map conversion completed')
 		Pcreat.create(tem)
@@ -85,7 +87,9 @@ class Map(object):
 
 
 def main(_):
-	v=Map()
+	args = sys.argv
+	print(args[1])
+	v=Map(str(args[1]))
 	rospy.spin()
 
 if __name__=='__main__':
