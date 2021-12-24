@@ -4,6 +4,7 @@ import numpy as np
 from scipy.special import comb
 import pandas as pd
 import matplotlib.pyplot as plt
+
 import glob
 import os
 
@@ -22,6 +23,7 @@ class path_creator():
         self.end=False
         self.start=start
         self.field=field
+        self.boxsize=10
 
     def save_csv(self):
         # Save CSV path file
@@ -43,6 +45,10 @@ class path_creator():
         y = event.ydata
         self.ln_v.set_xdata(x)
         self.ln_h.set_ydata(y)
+
+        self.rects.set_x(x-self.boxsize//2)
+        self.rects.set_y(y-self.boxsize//2)
+
         if event.button == 1:
             pass
         if event.button == 3:
@@ -73,32 +79,33 @@ class path_creator():
 
     def onkey(self,event):
         print('you pressed', event.key, event.xdata, event.ydata)
-        if event.key == 'p':
-            self.line1,=plt.plot(self.path[:,1],self.path[:,0],c="red")
-            self.path=self.pathconverter(self.path)
-            self.line2,=plt.plot(self.path[:,1],self.path[:,0],c="Cyan")
-            #経路配信
-            self.ros_path=self.path_generation(self.path,self.index_ox,self.index_oy,self.resolution)
-            self.end=True
-            self.save_csv()
-            plt.title("Path generation is completed!")
-        if event.key == 'i':
-            if self.path==[]:
-                self.path=np.array(self.start)
-                dot,=plt.plot(self.path[1],self.path[0],"o",c="red")
-                self.dot.append(dot)
-            else:
-                self.path=np.vstack((self.path,self.start))
-                dot,=plt.plot(self.path[:,1],self.path[:,0],"o",c="red")
-                self.dot.append(dot)
-        if event.key == 'd':
-            if self.path!=[]:
-                self.dot[-1].remove()
-                del self.dot[-1]
-                self.path=np.delete(self.path,-1, 0)
-                print(self.dot,self.path)
-            else:
-                plt.title("Error")
+        if not self.end:
+            if event.key == 'p':
+                self.line1,=plt.plot(self.path[:,1],self.path[:,0],c="red")
+                self.path=self.pathconverter(self.path)
+                self.line2,=plt.plot(self.path[:,1],self.path[:,0],c="Cyan")
+                #経路配信
+                self.ros_path=self.path_generation(self.path,self.index_ox,self.index_oy,self.resolution)
+                self.end=True
+                self.save_csv()
+                plt.title("Path generation is completed!")
+            if event.key == 'i':
+                if self.path==[]:
+                    self.path=np.array(self.start)
+                    dot,=plt.plot(self.path[1],self.path[0],"o",c="red")
+                    self.dot.append(dot)
+                else:
+                    self.path=np.vstack((self.path,self.start))
+                    dot,=plt.plot(self.path[:,1],self.path[:,0],"o",c="red")
+                    self.dot.append(dot)
+            if event.key == 'd':
+                if self.path!=[]:
+                    self.dot[-1].remove()
+                    del self.dot[-1]
+                    self.path=np.delete(self.path,-1, 0)
+                    print(self.dot,self.path)
+                else:
+                    plt.title("Error")
         if event.key == 'n':
             if self.end:
                 self.path=[self.path[-1,0],self.path[-1,1]]
@@ -172,10 +179,15 @@ class path_creator():
 
     def create(self,map):
         self.map=map
-        plt.figure(figsize=(8,8))
+        fig=plt.figure(figsize=(8,8))
+        ax = fig.add_subplot(111)
         self.ln_v = plt.axvline(0)
         self.ln_h = plt.axhline(0)
+        self.rects = plt.Rectangle((0,0),self.boxsize,self.boxsize,color='m',fill=False)
+        ax.add_artist(self.rects)
+
         self.path=[]
+        x=y=0
         if self.field=="r":
             x=970
             y=970
@@ -190,6 +202,7 @@ class path_creator():
             h=150
             plt.xlim(x,x+w)
             plt.ylim(y+h,y)
+        plt.text(x+10,y+10, "d:delete p:path generation n:create new path i:initial position" )
         #plt.imshow(self.map[y:y+h,x:x+w])
         plt.imshow(self.map)
         plt.title("Initial position addition with i key")
